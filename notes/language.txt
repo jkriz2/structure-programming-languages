@@ -1,0 +1,66 @@
+1 + 2
+
++ - K 
+
+1.234
+
+the dog ate a bone
+
+the dog ate a candy bar
+
+1.23
+
+the_car_weight
+
++ = / * 
+
+( ) 
+[ ]
+{ }
+
+9383tijegv3jir0g83
+
+letter,repeated once or more
+
+a
+
+bar
+
+digit, repeated once or more
+
+digit, repeated once or more, possibly followed by ".", possibly followed by a digit, repeated once or more
+
+"+"
+
+rules for tokens
+
+vocabulary (list of valid tokens) is infinite, defined by a set of rules
+
+bone dog blue ate green
+
+we have to arrange tokens sensibly 
+
+rules for arrangement are called "syntax"
+
+simple expressions --> 
+
+1
+12
+12+3
+1+3*4
+(1+3)*4
+
+tokenizer -> breaks character stream into tokens
+
+tokens == lexemes, lexical analysis, etc. "lexer" == tokenizer
+
+
+
+
+
+
+
+
+
+
+
