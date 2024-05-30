@@ -11,7 +11,8 @@ Accept a string of tokens, return an AST expressed as a stack of dictionaries
 
 from tokenizer import tokenize
 
-def parse_term(tokens, environment):
+
+def parse_term(tokens):
     """
     term = number
     """
@@ -19,39 +20,69 @@ def parse_term(tokens, environment):
         return tokens[0], tokens[1:]
     raise Exception("Error: number expected.")
 
+
 def test_parse_term():
-    print(
     """
     term = number
     """
-    )
-    t = tokenize("2")
-    ast, t = parse_term(t, {})
+    tokens = tokenize("2")
+    ast, tokens = parse_term(tokens)
     assert ast["tag"] == "number"
     assert ast["value"] == 2
-    assert t == []
 
-def parse_expression(tokens, environment):
+
+def parse_expression(tokens):
     """
     expression = term { "+" term };
     """
-    environment = {}
-    ast, tokens = parse_term(tokens, environment) 
-    while len(tokens) >= 1 and tokens[0] == "+":
-        tokens = tokens[1:]
-        term, tokens = parse_term(tokens, environment)
-        ast = {
-            "tag":"+",
-            "left": ast,
-            "right" : term 
-        }
-    pass
+    node, tokens = parse_term(tokens)
+    while tokens[0]["tag"] == "+":
+        new_node, tokens = parse_term(tokens[1:])
+        node = {"tag": "+", "left": node, "right": new_node}
+    return node, tokens
 
-def test_parse_single_digit():
-    print("test parse single digit")
-    environment = {}
+
+def test_parse_expression():
+    """
+    expression = term { "+" term };
+    """
     tokens = tokenize("2")
-    ast = parse_expression(tokens, environment)
+    ast, tokens = parse_term(tokens)
+    assert ast == {"tag": "number", "value": 2, "position": 0}
+    ast, tokens = parse_expression(tokenize("2+3"))
+    assert ast == {
+        "tag": "+",
+        "left": {"tag": "number", "value": 2, "position": 0},
+        "right": {"tag": "number", "value": 3, "position": 2},
+    }
+    ast, tokens = parse_expression(tokenize("1+2+3"))
+    assert ast == {
+        "tag": "+",
+        "left": {
+            "tag": "+",
+            "left": {"tag": "number", "value": 1, "position": 0},
+            "right": {"tag": "number", "value": 2, "position": 2},
+        },
+        "right": {"tag": "number", "value": 3, "position": 4},
+    }
+
+def parse(tokens):
+    ast, _ = parse_expression(tokens)
+    return ast
+
+def test_parse():
+    """
+    expression = term { "+" term };
+    """
+    for expression in ["2","2+2","1+2+3"]:
+        tokens = tokenize(expression)
+        ast1 = parse(tokens)
+        ast2, _ = parse_expression(tokens)
+        assert str(ast1) == str(ast2)
+
 
 if __name__ == "__main__":
     test_parse_term()
+    test_parse_expression()
+    test_parse()
+    print("done.")
