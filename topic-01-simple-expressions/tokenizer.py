@@ -45,18 +45,24 @@ def tokenize(characters):
                 token["value"] = float(token["value"])
             else:
                 token["value"] = int(token["value"])
-
+    token = {
+        "tag": "end",
+        "value": "",
+        "position": position,
+    }
+    tokens.append(token)
     return tokens
 
 
 def test_simple_tokens():
     print("testing simple tokens")
-    assert tokenize("") == []
+    assert tokenize("") == [{"tag": "end", "value": "", "position": 0}]
     assert tokenize("*")[0]["tag"] == "*"
     tokens = tokenize("*+")
     assert tokens == [
         {"tag": "*", "value": "*", "position": 0},
         {"tag": "+", "value": "+", "position": 1},
+        {"tag": "end", "value": "", "position": 2},
     ]
     tokens = tokenize("*/+-()")
     assert tokens == [
@@ -66,18 +72,32 @@ def test_simple_tokens():
         {"tag": "-", "value": "-", "position": 3},
         {"tag": "(", "value": "(", "position": 4},
         {"tag": ")", "value": ")", "position": 5},
+        {"tag": "end", "value": "", "position": 6},
     ]
     tokens = tokenize("123")
-    assert tokens == [{"tag": "number", "value": 123, "position": 0}]
+    assert tokens == [
+        {"tag": "number", "value": 123, "position": 0},
+        {"tag": "end", "value": "", "position": 3},
+    ]
     tokens = tokenize("123.45")
-    assert tokens == [{"tag": "number", "value": 123.45, "position": 0}]
+    assert tokens == [
+        {"tag": "number", "value": 123.45, "position": 0},
+        {"tag": "end", "value": "", "position": 6},
+    ]
     tokens = tokenize("123.")
-    assert tokens == [{"tag": "number", "value": 123.0, "position": 0}]
+    assert tokens == [
+        {"tag": "number", "value": 123.0, "position": 0},
+        {"tag": "end", "value": "", "position": 4},
+    ]
     tokens = tokenize(".25")
-    assert tokens == [{"tag": "number", "value": 0.25, "position": 0}]
+    assert tokens == [
+        {"tag": "number", "value": 0.25, "position": 0},
+        {"tag": "end", "value": "", "position": 3},
+    ]
 
 
 def test_tokenize_expression():
+    print("testing tokenize expression")
     tokens = tokenize("(3.5+40)/5-(3.*.4)")
     assert tokens == [
         {"tag": "(", "value": "(", "position": 0},
@@ -93,6 +113,7 @@ def test_tokenize_expression():
         {"tag": "*", "value": "*", "position": 14},
         {"tag": "number", "value": 0.4, "position": 15},
         {"tag": ")", "value": ")", "position": 17},
+        {"tag": "end", "value": "", "position": 18},
     ]
 
 
