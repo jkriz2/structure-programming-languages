@@ -6,7 +6,7 @@ Accept a string of tokens, return an AST expressed as a stack of dictionaries
 
 """
     term = number
-    expression = term { "+" term };
+    expression = term { "+"|"-" term };
 """
 
 from tokenizer import tokenize
@@ -36,15 +36,16 @@ def parse_expression(tokens):
     expression = term { "+" term };
     """
     node, tokens = parse_term(tokens)
-    while tokens[0]["tag"] == "+":
+    while tokens[0]["tag"] in ["+","-"]:
+        operator = tokens[0]["tag"]
         new_node, tokens = parse_term(tokens[1:])
-        node = {"tag": "+", "left": node, "right": new_node}
+        node = {"tag": operator, "left": node, "right": new_node}
     return node, tokens
 
 
 def test_parse_expression():
     """
-    expression = term { "+" term };
+    expression = term { "+"|"-" term };
     """
     tokens = tokenize("2")
     ast, tokens = parse_term(tokens)
@@ -64,6 +65,12 @@ def test_parse_expression():
             "right": {"tag": "number", "value": 2, "position": 2},
         },
         "right": {"tag": "number", "value": 3, "position": 4},
+    }
+    ast, tokens = parse_expression(tokenize("3-2"))
+    assert ast == {
+        "tag": "-",
+        "left": {"tag": "number", "value": 3, "position": 0},
+        "right": {"tag": "number", "value": 2, "position": 2},
     }
 
 def parse(tokens):
