@@ -5,31 +5,72 @@ Accept a string of tokens, return an AST expressed as a stack of dictionaries
 """
 
 """
-    term = number
+    simple_expression = number | "(" expression ")"
+    factor = simple_expression;
+    term = factor { "*"|"/" factor };
     expression = term { "+"|"-" term };
 """
 
 from tokenizer import tokenize
 
+def parse_simple_expression(tokens):
+    if tokens[0]["tag"] == "number":
+        return tokens[0], tokens[1:]
+    if tokens[0]["tag"] == "(":
+        node, tokens = parse_expression(tokens[1:])
+        assert tokens[0]["tag"] == ")", "Error: expected ')'"
+        return node, tokens[1:]
+    raise Exception("Error: unexpected token.")
+
+
+def test_parse_simple_expression():
+    tokens = tokenize("2")
+    ast, tokens = parse_factor(tokens)
+    assert ast["tag"] == "number"
+    assert ast["value"] == 2
+
+
+def parse_factor(tokens):
+    """
+    factor = simple_expression;
+    """
+    return parse_simple_expression(tokens)
+
+
+def test_parse_factor():
+    """
+    factor = simple_expression;
+    """
+    tokens = tokenize("2")
+    ast, tokens = parse_factor(tokens)
+    tokens = tokenize("2")
+    ast2, tokens2 = parse_simple_expression(tokens)
+    assert ast == ast2
+
 
 def parse_term(tokens):
     """
-    term = number
+    term = factor { "*"|"/" factor };
     """
-    if tokens[0]["tag"] == "number":
-        return tokens[0], tokens[1:]
-    raise Exception("Error: number expected.")
+    node, tokens = parse_factor(tokens)
+    while tokens[0]["tag"] in ["*", "/"]:
+        operator = tokens[0]["tag"]
+        new_node, tokens = parse_factor(tokens[1:])
+        node = {"tag": operator, "left": node, "right": new_node}
+    return node, tokens
 
 
 def test_parse_term():
     """
-    term = number
+    term = factor { "*"|"/" factor };
     """
     tokens = tokenize("2")
     ast, tokens = parse_term(tokens)
     assert ast["tag"] == "number"
     assert ast["value"] == 2
-
+    tokens = tokenize("2*2")
+    ast, tokens = parse_term(tokens)
+    assert ast == {'tag': '*', 'left': {'tag': 'number', 'value': 2, 'position': 0}, 'right': {'tag': 'number', 'value': 2, 'position': 2}}
 
 def parse_expression(tokens):
     """
@@ -72,6 +113,26 @@ def test_parse_expression():
         "left": {"tag": "number", "value": 3, "position": 0},
         "right": {"tag": "number", "value": 2, "position": 2},
     }
+    ast, tokens = parse_expression(tokenize("1+2*3"))
+    assert ast == {
+        "tag": "+",
+        "left": {"tag": "number", "value": 1, "position": 0},
+        "right": {
+            "tag": "*",
+            "left": {"tag": "number", "value": 2, "position": 2},
+            "right": {"tag": "number", "value": 3, "position": 4},
+        },
+    }
+    ast, tokens = parse_expression(tokenize("(1+2)*3"))
+    assert ast == {
+        "tag": "*",
+        "left": {
+            "tag": "+",
+            "left": {"tag": "number", "value": 1, "position": 1},
+            "right": {"tag": "number", "value": 2, "position": 3},
+        },
+        "right": {"tag": "number", "value": 3, "position": 6},
+    }
 
 def parse(tokens):
     ast, _ = parse_expression(tokens)
@@ -89,6 +150,8 @@ def test_parse():
 
 
 if __name__ == "__main__":
+    test_parse_simple_expression()
+    test_parse_factor()
     test_parse_term()
     test_parse_expression()
     test_parse()

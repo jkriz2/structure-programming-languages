@@ -13,6 +13,14 @@ def evaluate(ast, environment):
         left_value, _ = evaluate(ast["left"], environment)
         right_value, _ = evaluate(ast["right"], environment)
         return left_value - right_value, False
+    if ast["tag"] == "*":
+        left_value, _ = evaluate(ast["left"], environment)
+        right_value, _ = evaluate(ast["right"], environment)
+        return left_value * right_value, False
+    if ast["tag"] == "/":
+        left_value, _ = evaluate(ast["left"], environment)
+        right_value, _ = evaluate(ast["right"], environment)
+        return left_value / right_value, False
 
 def equals(code, environment, expected_result, expected_environment=None):
     result, _ = evaluate(parse(tokenize(code)), environment)
@@ -51,13 +59,28 @@ def test_evaluate_subtraction():
     equals("11-5", {}, 6)
 
 
+def test_evaluate_multiplication():
+    print("test evaluate multiplication")
+    equals("11*5", {}, 55)
+
+
+def test_evaluate_division():
+    print("test evaluate division")
+    equals("12/3", {}, 4)
+
+
 def test_evaluate_complex_expression():
     print("test evaluate complex expression")
     equals("(3+4)-(1+2)", {}, 4)
+    equals("3+4*2", {}, 11)
+    equals("(1+2)*3",{},9)
 
 
 if __name__ == "__main__":
     test_evaluate_single_value()
     test_evaluate_addition()
     test_evaluate_subtraction()
+    test_evaluate_multiplication()
+    test_evaluate_division()
+    test_evaluate_complex_expression()
     print("done")
