@@ -115,6 +115,25 @@ def test_tokenize_expression():
         {"tag": ")", "value": ")", "position": 17},
         {"tag": "end", "value": "", "position": 18},
     ]
+    tokens = tokenize("-(-3.5+40)/5-(3.*.4)")
+    assert tokens == [
+        {"tag": "-", "value": "-", "position": 0},
+        {"tag": "(", "value": "(", "position": 1},
+        {"tag": "-", "value": "-", "position": 2},
+        {"tag": "number", "value": 3.5, "position": 3},
+        {"tag": "+", "value": "+", "position": 6},
+        {"tag": "number", "value": 40, "position": 7},
+        {"tag": ")", "value": ")", "position": 9},
+        {"tag": "/", "value": "/", "position": 10},
+        {"tag": "number", "value": 5, "position": 11},
+        {"tag": "-", "value": "-", "position": 12},
+        {"tag": "(", "value": "(", "position": 13},
+        {"tag": "number", "value": 3.0, "position": 14},
+        {"tag": "*", "value": "*", "position": 16},
+        {"tag": "number", "value": 0.4, "position": 17},
+        {"tag": ")", "value": ")", "position": 19},
+        {"tag": "end", "value": "", "position": 20},
+    ]
 
 
 if __name__ == "__main__":
