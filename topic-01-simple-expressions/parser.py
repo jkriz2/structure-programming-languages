@@ -28,6 +28,12 @@ def parse_simple_expression(tokens):
         new_node, tokens = parse_simple_expression(tokens[1:])
         node = {"tag": "negate", "value" : new_node}
         return node, tokens
+    if tokens[0]["tag"]== "!":
+        new_node, tokens = parse_simple_expression(tokens[1:])
+        node = {"tag": "!", "value" : new_node}
+        return node, tokens
+
+
     return node, tokens
 
     raise Exception("Error: unexpected token.")

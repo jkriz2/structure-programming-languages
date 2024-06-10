@@ -24,6 +24,9 @@ def evaluate(ast, environment):
     if ast["tag"] == "negate":
         value, _ = evaluate(ast["value"], environment)
         return -value, False
+    if ast["tag"] == "!":
+        value, _ = evaluate(ast["value"], environment)
+        return not value, False
     raise Exception(f"Unknown token in AST: {ast['tag']}")
 
 def equals(code, environment, expected_result, expected_environment=None):
@@ -85,6 +88,14 @@ def test_evaluate_complex_expression():
     equals("3+4*2", {}, 11)
     equals("(1+2)*3",{},9)
 
+def test_evaluate_logical_negation():
+    print("test evaluate logical negation")
+    equals("!1", {}, 0)
+    equals("!0", {}, 1)
+    equals("!23", {}, 0)
+    equals("!(1)+23", {}, 23)
+    equals("!(2*23)", {}, 0)
+
 
 if __name__ == "__main__":
     test_evaluate_single_value()
@@ -94,4 +105,5 @@ if __name__ == "__main__":
     test_evaluate_division()
     test_evaluate_unary_negation()
     test_evaluate_complex_expression()
+    test_evaluate_logical_negation()
     print("done")
