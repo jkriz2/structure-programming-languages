@@ -27,6 +27,10 @@ def evaluate(ast, environment):
     if ast["tag"] == "!":
         value, _ = evaluate(ast["value"], environment)
         return not value, False
+    if ast["tag"] == "mod":
+        left_value, _ = evaluate(ast["left"], environment)
+        right_value, _ = evaluate(ast["right"], environment)
+        return left_value % right_value, False
     raise Exception(f"Unknown token in AST: {ast['tag']}")
 
 def equals(code, environment, expected_result, expected_environment=None):
@@ -96,6 +100,11 @@ def test_evaluate_logical_negation():
     equals("!(1)+23", {}, 23)
     equals("!(2*23)", {}, 0)
 
+def test_evaluate_mod():
+    print("test evaluate mod")
+    equals("10%3", {}, 1)
+    equals("10%3*2", {}, 2)
+    equals("2*10%3", {}, 2)
 
 if __name__ == "__main__":
     test_evaluate_single_value()
@@ -106,4 +115,5 @@ if __name__ == "__main__":
     test_evaluate_unary_negation()
     test_evaluate_complex_expression()
     test_evaluate_logical_negation()
+    test_evaluate_mod()
     print("done")
