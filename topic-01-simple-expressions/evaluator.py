@@ -105,6 +105,10 @@ def test_evaluate_mod():
     equals("10%3", {}, 1)
     equals("10%3*2", {}, 2)
     equals("2*10%3", {}, 2)
+    equals("2*11%3", {}, 1)
+    equals("2*(11%3)", {}, 4)
+    equals("2*!0", {}, 2)
+    equals("-11%3", {}, 1)
 
 if __name__ == "__main__":
     test_evaluate_single_value()
