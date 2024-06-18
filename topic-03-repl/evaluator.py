@@ -19,9 +19,22 @@ def evaluate(ast, environment):
             else:
                 environment = environment.get("$parent", None)
         return None, False
+    if ast["tag"] == "if":
+        condition, _ = evaluate(ast["condition"], environment)
+        if condition:
+            value, _ = evaluate(ast["then"], environment)
+            return value, False
+        if ast.get("else", None):
+            value, _ = evaluate(ast["else"], environment)
+            return value, False
+
     if ast["tag"] == "print":
-        value, _ = evaluate(ast["value"], environment)
-        print(value)
+        argument = ast.get("arguments", None)
+        while(argument):
+            value, _ = evaluate(argument, environment)
+            print(value, end = " ")
+            argument = argument.get("next", None)
+        print()
         return None, False
     if ast["tag"] == "+":
         left_value, _ = evaluate(ast["left"], environment)
@@ -78,8 +91,15 @@ def test_evaluate_single_value():
 
 def test_evaluate_print_statement():
     print("test evaluate print_statement.")
-    # equals("print()", {}, None, None)
+    equals("print()", {}, None, None)
     equals("print(1)", {}, None, None)
+    equals("print(1,2,3)", {}, None, None)
+
+
+def test_evaluate_if_statement():
+    print("test evaluate if statement.")
+    equals("if(1) print(1111)", {}, None, None)
+    equals("if(0) print(1111) else print(2222)", {}, None, None)
 
 
 def test_evaluate_addition():
@@ -129,5 +149,6 @@ if __name__ == "__main__":
     test_evaluate_division()
     test_evaluate_unary_negation()
     test_evaluate_complex_expression()
+    test_evaluate_if_statement()
     test_evaluate_print_statement()
     print("done")

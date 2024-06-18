@@ -9,15 +9,19 @@ break character stream into tokens, provide a list of tokens
 import re
 
 patterns = [
+    ["\s+", "#whitespace"],
     ["\(", "("],
     ["\)", ")"],
     ["\*", "*"],
     ["\/", "/"],
     ["\+", "+"],
     ["\-", "-"],
+    ["\,", ","],
     ["print", "print"],
+    ["if", "if"],
+    ["else", "else"],
     ["(\d*\.\d+)|(\d+\.\d*)|(\d+)", "number"],
-    ["[A-Za-z_][A-Za-z0-9_]*","identifier"],
+    ["[A-Za-z_][A-Za-z0-9_]*", "identifier"],
 ]
 
 for pattern in patterns:
@@ -33,6 +37,9 @@ def tokenize(characters):
             if match:
                 break
         assert match
+        if tag in ["#whitespace"]:
+            position = match.end()
+            continue
         # update position for next match
         token = {
             "tag": tag,
@@ -57,7 +64,7 @@ def tokenize(characters):
 
 
 def test_simple_tokens():
-    print("testing simple tokens")
+    print("test simple tokens")
     assert tokenize("") == [{"tag": "end", "value": "", "position": 0}]
     assert tokenize("*")[0]["tag"] == "*"
     tokens = tokenize("*+")
@@ -66,7 +73,7 @@ def test_simple_tokens():
         {"tag": "+", "value": "+", "position": 1},
         {"tag": "end", "value": "", "position": 2},
     ]
-    tokens = tokenize("*/+-()print")
+    tokens = tokenize("*/+-(),printifelse")
     assert tokens == [
         {"tag": "*", "value": "*", "position": 0},
         {"tag": "/", "value": "/", "position": 1},
@@ -74,8 +81,11 @@ def test_simple_tokens():
         {"tag": "-", "value": "-", "position": 3},
         {"tag": "(", "value": "(", "position": 4},
         {"tag": ")", "value": ")", "position": 5},
-        {"tag": "print", "value": "print", "position": 6},
-        {"tag": "end", "value": "", "position": 11},
+        {"tag": ",", "value": ",", "position": 6},
+        {"tag": "print", "value": "print", "position": 7},
+        {"tag": "if", "value": "if", "position": 12},
+        {"tag": "else", "value": "else", "position": 14},
+        {"tag": "end", "value": "", "position": 18},
     ]
     tokens = tokenize("123")
     assert tokens == [
@@ -98,7 +108,15 @@ def test_simple_tokens():
         {"tag": "end", "value": "", "position": 3},
     ]
 
+def test_whitespace():
+    print("test whitespace")
+    t1 = tokenize("1")
+    for s in ["1","1  ","  1", "  1  ","\t1","\n1\n"]:
+        t2 = tokenize(s)
+        assert t1[0]["value"] == t2[0]["value"]
+
 def test_identifier():
+    print("test identifier")
     tokens = tokenize("x")
     assert tokens == [
         {"tag": "identifier", "value": "x", "position": 0},
@@ -118,7 +136,7 @@ def test_identifier():
     assert tokens[0] == {"tag": "identifier", "value": "xyz_0", "position": 0}
 
 def test_tokenize_expression():
-    print("testing tokenize expression")
+    print("test tokenize expression")
     tokens = tokenize("(3.5+40)/5-(3.*.4)")
     assert tokens == [
         {"tag": "(", "value": "(", "position": 0},
@@ -159,6 +177,7 @@ def test_tokenize_expression():
 
 if __name__ == "__main__":
     test_simple_tokens()
+    test_whitespace()
     test_identifier()
     test_tokenize_expression()
     print("done.")
