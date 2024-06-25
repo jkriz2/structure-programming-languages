@@ -41,7 +41,8 @@ def eval(code, environment):
     tokens = tokenize(code)
     ast = parse(tokens)
     value, _ = evaluate(ast, environment)
-    print(value)
+    if value:   
+        print(value)
 
 if __name__ == "__main__":
     repl(eval)
