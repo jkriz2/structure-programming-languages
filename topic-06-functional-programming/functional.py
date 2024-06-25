@@ -83,7 +83,6 @@ def reverse(t):
     else:
         return concat(reverse(tail(t)), [first(t)])
 
-# broken -- working on it
 def mirror(t):
     print("t =", t)
     if not is_list(t):
