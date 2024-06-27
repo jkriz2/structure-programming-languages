@@ -83,7 +83,6 @@ def reverse(t):
     else:
         return concat(reverse(tail(t)), [first(t)])
 
-# broken -- working on it
 def mirror(t):
     print("t =", t)
     if not is_list(t):
@@ -93,7 +92,7 @@ def mirror(t):
         if length(t) == 0:
             return t
         else:
-            return concat(mirror(tail(t)), mirror(first(t)))
+            return concat(mirror(tail(t)), [mirror(first(t))])
 
 
 if __name__ == "__main__":
@@ -104,4 +103,5 @@ if __name__ == "__main__":
     print(sort2([1, 4, 6, 7, 8, 9, 3, 4, 5, 2, 7]))
     print(sort2(["cat","apple","banana","dog","zebra","moose"]))
     print(reverse([1, 4, 6, 7, 8, 9, 3, 4, 5, 2, 7]))
-    print(mirror([1, 4, 6, 7, 8, 9, 3, 4, 5, 2, 7]))
+    print(mirror([1, 4, [6, 7, [8, 9]], 3, 4, 5, 2, 7]))
+    print()
