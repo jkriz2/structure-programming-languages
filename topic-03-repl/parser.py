@@ -113,7 +113,7 @@ def parse_expression(tokens):
     node, tokens = parse_term(tokens)
     while tokens[0]["tag"] in ["+", "-"]:
         operator = tokens[0]["tag"]
-        new_node, tokens = parse_term(tokens[1:])
+        new_node, tokens = parse_term(tokens[1:]) # eats the equals sign
         node = {"tag": operator, "left": node, "right": new_node}
     return node, tokens
 
