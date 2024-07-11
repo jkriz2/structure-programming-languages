@@ -18,11 +18,31 @@ patterns = [
     ["\-", "-"],
     ["\,", ","],
     ["\=", "="],
+    ["\{", "{"],
+    ["\}", "}"],
+    ["\;", ";"],
+    [r"==", "=="],
+    [r"!=", "!="],
+    [r"<=", "<="],
+    [r">=", ">="],
+    [r"<", "<"],
+    [r">", ">"],
+    [r"\&\&", "&&"],
+    [r"\|\|", "||"],
+    [r"\!", "!"],
+    [r"=", "="],
+    [r"\[", "["],
+    [r"\]", "]"],
+    [r",", ","],
+    [r"\;", ";"],
     ["print", "print"],
     ["if", "if"],
     ["else", "else"],
+    ["while", "while"],
     ["(\d*\.\d+)|(\d+\.\d*)|(\d+)", "number"],
     ["[A-Za-z_][A-Za-z0-9_]*", "identifier"],
+    [r"\.", "."],
+    # [r".", "#error"],  # unexpected content
 ]
 
 for pattern in patterns:
@@ -37,7 +57,9 @@ def tokenize(characters):
             match = pattern.match(characters, position)
             if match:
                 break
-        assert match
+        assert (
+            match
+        ), f"Failed to match token with [{characters}] finding {characters[15:]} at position {position}."
         if tag in ["#whitespace"]:
             position = match.end()
             continue
@@ -74,7 +96,7 @@ def test_simple_tokens():
         {"tag": "+", "value": "+", "position": 1},
         {"tag": "end", "value": "", "position": 2},
     ]
-    tokens = tokenize("*/+-(),printifelse=")
+    tokens = tokenize("*/+-(),printifelse=while{};")
     assert tokens == [
         {"tag": "*", "value": "*", "position": 0},
         {"tag": "/", "value": "/", "position": 1},
@@ -86,8 +108,12 @@ def test_simple_tokens():
         {"tag": "print", "value": "print", "position": 7},
         {"tag": "if", "value": "if", "position": 12},
         {"tag": "else", "value": "else", "position": 14},
-        {"tag": "=", "value":"=", "position":18},
-        {"tag": "end", "value": "", "position": 19},
+        {"tag": "=", "value": "=", "position": 18},
+        {"tag": "while", "value": "while", "position": 19},
+        {"tag": "{", "value": "{", "position": 24},
+        {"tag": "}", "value": "}", "position": 25},
+        {"tag": ";", "value": ";", "position": 26},
+        {"tag": "end", "value": "", "position": 27},
     ]
     tokens = tokenize("123")
     assert tokens == [

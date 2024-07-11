@@ -1,0 +1,104 @@
+Fortran
+     C Write confusing code
+
+      if not(x=3) 200
+      write(6,"hello") 
+      goto 105
+      goto 300
+200   write(6,"not hello")
+      goto 300
+105   goto 200
+300   ...
+
+ALGOL 
+
+if (x=3)
+    y := 4
+    z := 5
+fi
+
+Pascal
+
+if (x=3) begin
+    y := 4
+    z := 5
+end
+
+if (x=3) 
+begin
+    y := 4
+    z := 5
+end
+
+if (x=3) 
+    begin
+    y := 4
+    z := 5
+    end
+else
+    begin
+    end
+
+if (x=3) 
+    begin
+        y := 4
+        z := 5
+    end
+
+if (x==3) {
+    x = 4
+    y = 5
+}
+else {
+
+}
+
+if (x==3) 
+{
+    x = 4
+    y = 5
+}
+
+if (x==3) 
+    {
+        x = 4
+        y = 5
+    }
+
+if (x==3) {
+    x = 4
+    y = 5 }
+
+Ratfor:
+
+if (x = 3) {
+    x = 4
+    y = 5
+}
+
+      if (x = 3) goto 100
+      goto 200
+100   x = 1
+      y = 4
+
+Python:
+
+if x==3:
+    x = 4
+    y = 5
+
+function(foo){
+    if (x==3) {
+        y = 5
+        x = 5
+        if (z == 2) 
+            while(y > 3) {
+                y = y -1;
+                return 4
+                goto 100
+            }
+    }
+100: return 4
+}
+
+
