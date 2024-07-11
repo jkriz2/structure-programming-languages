@@ -30,9 +30,9 @@ def evaluate(ast, environment):
 
     if ast["tag"] == "print":
         argument = ast.get("arguments", None)
-        while(argument):
+        while argument:
             value, _ = evaluate(argument, environment)
-            print(value, end = " ")
+            print(value, end=" ")
             argument = argument.get("next", None)
         print()
         return None, False
@@ -88,6 +88,7 @@ def test_evaluate_single_value():
     equals("x", {"x": 3.0, "$parent": {"x": 4.0}}, 3.0)
     equals("x", {"y": 3.0, "$parent": {"x": 4.0}}, 4.0)
     equals("x", {"y": 3.0, "z": 8.0, "$parent": {"y": 4.0, "$parent": {"x": 5.5}}}, 5.5)
+
 
 def test_evaluate_print_statement():
     print("test evaluate print_statement.")
