@@ -30,12 +30,22 @@ def evaluate(ast, environment):
 
     if ast["tag"] == "print":
         argument = ast.get("arguments", None)
-        while(argument):
+        while argument:
             value, _ = evaluate(argument, environment)
-            print(value, end = " ")
+            print(value, end=" ")
             argument = argument.get("next", None)
         print()
         return None, False
+
+    if ast["tag"] == "block":
+        value, returning = evaluate(ast["statement"], environment)
+        if ast.get("next") and not returning:
+            value, returning = evaluate(ast["next"], environment)
+        # if returning:
+        #     return value, returning
+        # else:
+        #     return None, False
+
     if ast["tag"] == "+":
         left_value, _ = evaluate(ast["left"], environment)
         right_value, _ = evaluate(ast["right"], environment)
@@ -55,6 +65,17 @@ def evaluate(ast, environment):
     if ast["tag"] == "negate":
         value, _ = evaluate(ast["value"], environment)
         return -value, False
+    if ast["tag"] == "=":
+        assert (
+            ast["target"]["tag"] == "<identifier>"
+        ), f"ERROR: Expecting identifier in assignment statement."
+        identifier = ast["target"]["value"]
+        assert ast["value"], f"ERROR: Expecting expression in assignment statement."
+        value, _ = evaluate(ast["value"], environment)
+        environment[identifier] = value
+        return None, False
+    raise Exception(f"Unknown operation: {ast['tag']}")
+
     raise Exception(f"Unknown token in AST: {ast['tag']}")
 
 
@@ -88,6 +109,7 @@ def test_evaluate_single_value():
     equals("x", {"x": 3.0, "$parent": {"x": 4.0}}, 3.0)
     equals("x", {"y": 3.0, "$parent": {"x": 4.0}}, 4.0)
     equals("x", {"y": 3.0, "z": 8.0, "$parent": {"y": 4.0, "$parent": {"x": 5.5}}}, 5.5)
+
 
 def test_evaluate_print_statement():
     print("test evaluate print_statement.")
@@ -141,6 +163,14 @@ def test_evaluate_complex_expression():
     equals("(1+2)*3", {}, 9)
 
 
+def test_evaluate_block_statement():
+    print("test evaluate block statement.")
+    equals("{x=4}", {}, None, {"x": 4})
+    equals("{x=4; y=3}", {}, None, {"x": 4, "y": 3})
+    equals("{x=4; y=3; y=1}", {}, None, {"x": 4, "y": 1})
+    # equals("{x=3; y=0; while (x>0) {x=x-1;y=y+1}}", {}, None, {"x": 0, "y": 3})
+
+
 if __name__ == "__main__":
     test_evaluate_single_value()
     test_evaluate_addition()
@@ -151,4 +181,5 @@ if __name__ == "__main__":
     test_evaluate_complex_expression()
     test_evaluate_if_statement()
     test_evaluate_print_statement()
+    test_evaluate_block_statement()
     print("done")

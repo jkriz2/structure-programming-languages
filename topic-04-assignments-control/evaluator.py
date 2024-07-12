@@ -19,6 +19,7 @@ def evaluate(ast, environment):
             else:
                 environment = environment.get("$parent", None)
         return None, False
+
     if ast["tag"] == "if":
         condition, _ = evaluate(ast["condition"], environment)
         if condition:
@@ -28,6 +29,13 @@ def evaluate(ast, environment):
             value, _ = evaluate(ast["else"], environment)
             return value, False
 
+    if ast["tag"] == "while":
+        condition, _ = evaluate(ast["condition"], environment)
+        while condition:
+            evaluate(ast["do"], environment)
+            condition, _ = evaluate(ast["condition"], environment)
+        return None, False
+
     if ast["tag"] == "print":
         argument = ast.get("arguments", None)
         while(argument):
@@ -36,6 +44,25 @@ def evaluate(ast, environment):
             argument = argument.get("next", None)
         print()
         return None, False
+
+    if ast["tag"] == "block":
+        value, returning = evaluate(ast["statement"], environment)
+        if ast.get("next") and not returning:
+            value, returning = evaluate(ast["next"], environment)
+        return value, returning
+        # if returning:
+        #     return value, returning
+        # else:
+        #     return None, False
+
+    if ast["tag"] == "not":
+        value, _ = evaluate(ast["value"], environment)
+        if value:
+            value = 0
+        else:
+            value = 1
+        return value, False
+
     if ast["tag"] == "+":
         left_value, _ = evaluate(ast["left"], environment)
         right_value, _ = evaluate(ast["right"], environment)
@@ -52,9 +79,50 @@ def evaluate(ast, environment):
         left_value, _ = evaluate(ast["left"], environment)
         right_value, _ = evaluate(ast["right"], environment)
         return left_value / right_value, False
+    if ast["tag"] == "<":
+        left_value, _ = evaluate(ast["left"], environment)
+        right_value, _ = evaluate(ast["right"], environment)
+        return int(left_value < right_value), False
+    if ast["tag"] == ">":
+        left_value, _ = evaluate(ast["left"], environment)
+        right_value, _ = evaluate(ast["right"], environment)
+        return int(left_value > right_value), False
+    if ast["tag"] == "<=":
+        left_value, _ = evaluate(ast["left"], environment)
+        right_value, _ = evaluate(ast["right"], environment)
+        return int(left_value <= right_value), False
+    if ast["tag"] == ">=":
+        left_value, _ = evaluate(ast["left"], environment)
+        right_value, _ = evaluate(ast["right"], environment)
+        return int(left_value >= right_value), False
+    if ast["tag"] == "==":
+        left_value, _ = evaluate(ast["left"], environment)
+        right_value, _ = evaluate(ast["right"], environment)
+        return int(left_value == right_value), False
+    if ast["tag"] == "!=":
+        left_value, _ = evaluate(ast["left"], environment)
+        right_value, _ = evaluate(ast["right"], environment)
+        return int(left_value != right_value), False
+    if ast["tag"] == "&&":
+        left_value, _ = evaluate(ast["left"], environment)
+        right_value, _ = evaluate(ast["right"], environment)
+        return int(left_value and right_value), False
+    if ast["tag"] == "||":
+        left_value, _ = evaluate(ast["left"], environment)
+        right_value, _ = evaluate(ast["right"], environment)
+        return int(left_value or right_value), False
     if ast["tag"] == "negate":
         value, _ = evaluate(ast["value"], environment)
         return -value, False
+    if ast["tag"] == "=":
+        assert (
+            ast["target"]["tag"] == "identifier"
+        ), f"ERROR: Expecting identifier in assignment statement."
+        identifier = ast["target"]["value"]
+        assert ast["value"], f"ERROR: Expecting expression in assignment statement."
+        value, _ = evaluate(ast["value"], environment)
+        environment[identifier] = value
+        return None, False
     raise Exception(f"Unknown token in AST: {ast['tag']}")
 
 
@@ -102,6 +170,12 @@ def test_evaluate_if_statement():
     equals("if(0) print(1111) else print(2222)", {}, None, None)
 
 
+def test_evaluate_while_statement():
+    print("test evaluate while statement.")
+    equals("while(0) print(145)", {}, None, None)
+    equals("while(i) i = i-1", {"i": 4}, None, {"i": 0})
+
+
 def test_evaluate_addition():
     print("test evaluate addition")
     equals("1+3", {}, 4)
@@ -141,6 +215,14 @@ def test_evaluate_complex_expression():
     equals("(1+2)*3", {}, 9)
 
 
+def test_evaluate_block_statement():
+    print("test evaluate block statement.")
+    equals("{x=4}", {}, None, {"x": 4})
+    equals("{x=4; y=3}", {}, None, {"x": 4, "y": 3})
+    equals("{x=4; y=3; y=1}", {}, None, {"x": 4, "y": 1})
+    # equals("{x=3; y=0; while (x>0) {x=x-1;y=y+1}}", {}, None, {"x": 0, "y": 3})
+
+
 if __name__ == "__main__":
     test_evaluate_single_value()
     test_evaluate_addition()
@@ -150,5 +232,7 @@ if __name__ == "__main__":
     test_evaluate_unary_negation()
     test_evaluate_complex_expression()
     test_evaluate_if_statement()
-    test_evaluate_print_statement()
+    test_evaluate_while_statement()
+    test_evaluate_print_statement()    
+    test_evaluate_block_statement()
     print("done")
